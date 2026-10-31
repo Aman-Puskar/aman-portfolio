@@ -130,6 +130,7 @@ export default function Chat({ open, setOpen }) {
   const [msgs, setMsgs] = useState([{ id: 0, role: "bot", text: "Hi, I’m Aman’s AI assistant. Ask me about his GenAI experience, projects or skills." }]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [hasReceivedFirstResponse, setHasReceivedFirstResponse] = useState(false);
   const end = useRef(null);
   const inp = useRef(null);
   const scroll = () => end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -151,6 +152,7 @@ export default function Chat({ open, setOpen }) {
     const to = setTimeout(() => ac.abort(), 60000);
     try {
       const a = await askApi(q, ac.signal);
+      setHasReceivedFirstResponse(true);
       setMsgs((m) => [...m, { id: Date.now() + 1, role: "bot", text: a }]);
     } catch {
       setMsgs((m) => [...m, {
@@ -191,7 +193,9 @@ export default function Chat({ open, setOpen }) {
                 {busy && (
                   <motion.div key="typing" className="thinking-card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                     <FaceAvatar thinking />
-                    <span>Thinking…</span>
+                    <span role="status" aria-live="polite">
+                      {hasReceivedFirstResponse ? "Thinking…" : "The server is waking up. Please wait…"}
+                    </span>
                   </motion.div>
                 )}
               </AnimatePresence>
